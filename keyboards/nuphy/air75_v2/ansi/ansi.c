@@ -1,3 +1,8 @@
+#ifdef CONSOLE_ENABLE
+#include "print.h"
+#endif
+// char _MACRO_STRING[ ] = "XXXXX";
+#include "macro.h"
 /*
 Copyright 2023 @ Nuphy <https://nuphy.com/>
 
@@ -100,6 +105,16 @@ void gpio_init(void) {
     /* open led DC driver */
     setPinOutput(DC_BOOST_PIN);
     writePinHigh(DC_BOOST_PIN);
+}
+
+bool isMac(void) {
+    bool num_lock_on = false;
+    if (dev_info.link_mode == LINK_USB) {
+        num_lock_on = host_keyboard_led_state().num_lock;
+    } else {
+        num_lock_on = dev_info.rf_led & 0x01;
+    }
+    return !(num_lock_on);
 }
 
 /**
@@ -291,7 +306,7 @@ void dial_sw_scan(void) {
         }
     }
 
-    if (dial_scan & 0x02) {
+    if (isMac()) {
         if (dev_info.sys_sw_state != SYS_SW_MAC) {
             f_sys_show = 1;
             default_layer_set(1 << 0);
@@ -362,7 +377,7 @@ void dial_sw_fast_scan(void) {
     }
 
     // Win or Mac
-    if (dial_scan_sys) {
+    if (isMac()) {
         if (dev_info.sys_sw_state != SYS_SW_MAC) {
             default_layer_set(1 << 0);
             dev_info.sys_sw_state = SYS_SW_MAC;
@@ -433,6 +448,20 @@ void londing_eeprom_data(void) {
 
 /* qmk process record */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+#ifdef CONSOLE_ENABLE
+    uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+    uprintf("isMac() = %d\n", isMac());
+    if (dev_info.link_mode == LINK_USB) {
+        uprintf("USB: Num Lock  = %d\n", host_keyboard_led_state().num_lock);
+        uprintf("USB: Caps Lock = %d\n", host_keyboard_led_state().caps_lock);
+    } else {
+        uprintf("RF: Locks  = 0x%x\n", dev_info.rf_led);
+        uprintf("RF: Num Lock  (0x01) = %d\n", dev_info.rf_led & 0x01);
+        uprintf("RF: Caps Lock (0x02) = %d\n", dev_info.rf_led & 0x02);
+    }
+    uprintf("Current systems internal state is Win = %d\n", dev_info.sys_sw_state != SYS_SW_WIN);
+#endif
+
     no_act_time = 0;
     switch (keycode) {
         case RF_DFU:
@@ -602,6 +631,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_code(KC_LSFT);
                     unregister_code(KC_LGUI);
                 }
+            }
+            return false;
+
+        case _MACRO_:
+            if (record->event.pressed) {
+                SEND_STRING(_MACRO_STRING);
             }
             return false;
 

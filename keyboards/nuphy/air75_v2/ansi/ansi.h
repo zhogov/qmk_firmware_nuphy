@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum custom_keycodes {
     RF_DFU = QK_KB_0,
+    _MACRO_,
     LNK_USB,
     LNK_RF,
     LNK_BLE1,

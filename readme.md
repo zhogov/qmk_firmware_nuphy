@@ -1,3 +1,42 @@
+# zhogov's custom fork
+
+This is my custom fork of the non-merged QMK firmware for Nuphy Air75 v2.
+`qmk/qmk_firmware` ← `nuphy-src/qmk_firmware` ← `zhogov/qmk_firmware_nuphy`
+
+**Changes** to the Nuphy version:
+- Windows layer is enabled when NumLock is on
+- Windows mapping:
+  - `LEFT_CMD`    to `LEFT_CTRL`
+  - `RIGHT_CMD`   to `RIGHT_WIN`
+  - `LEFT_OPTION` to `LEFT_ALT`
+  - `FN + CAPS_LOCK` to `NUM_LOCK`
+- Common mapping:
+  - `FN + B` to `BAT_NUM` – shows battery as LEDs on numbers
+  - Macros on `FN + CAT` button. `macro.h` must contain macros like:
+```
+char _MACRO_STRING[ ] = "\x12\x34\x12\x34\x12\x34\x12\x34\x12\x34";
+```
+
+Pulling latest Nuphy changes:
+```
+git remote add nuphy-src git@github.com:nuphy-src/qmk_firmware.git
+git pull --rebase nuphy-src nuphy-keyboards
+git push --force
+```
+
+**Compiling**: generates nuphy_air75_v2_ansi_via.bin
+```
+util/docker_build.sh nuphy/air75_v2/ansi:via 
+```
+
+**Flash** using QMK Toolbox app:
+- Start QMK Toolbox
+- Either:
+  - Move switch from OFF to WIRED while holding ESC
+  - Connect keyboard while holding ESC
+- Select firmware file
+- Flash
+
 # Quantum Mechanical Keyboard Firmware
 
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
